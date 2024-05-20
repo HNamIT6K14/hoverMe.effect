@@ -29,7 +29,7 @@ const ctx = canvas.getContext('2d');
 function drawWaveform(dataArray) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#7D5FFF';
+    // ctx.strokeStyle = '#7D5FFF';
 
     var radialGradient = ctx.createLinearGradient(0, 200, 200, 0);
         radialGradient.addColorStop(0, '#9980FA');
@@ -37,7 +37,7 @@ function drawWaveform(dataArray) {
         radialGradient.addColorStop(1, '#12CBC4');
 
         // Thiết lập strokeStyle là gradient vừa tạo
-        context.strokeStyle = radialGradient;
+        ctx.strokeStyle = radialGradient;
     ctx.beginPath();
     const sliceWidth = canvas.width * 1.0 / dataArray.length;
     let x = 0;
