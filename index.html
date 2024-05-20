@@ -3,90 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Voice Wave Effect</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+        }
+    </style>
 </head>
-<style>
-    body{
-        padding: 0;
-        margin: 0;
-        background: #2d3436;
-    }
-    .middle{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .btn{
-        position: relative;
-        display: block;
-        color: white;
-        font-size: 14px;
-        font-family: "monterserrat";
-        text-decoration: none;
-        margin: 30px 0;
-        border: 2px solid #ff7675;
-        padding: 14px 60px;
-        text-transform: uppercase;
-        overflow: hidden;
-        transition: 1s all ease;
-    }
-    .btn::before{
-        background: #ff7675;
-        content: "";
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: -1;
-        transition: all 0.6s ease;
-    }
-    .btn1::before{
-        width: 0;
-        height: 100%;
-    }
-    .btn:hover::before{
-        width: 100%;
-    }
-    .btn2::before{
-        width: 100%;
-        height: 0;
-    }
-    .btn:hover::before{
-        height: 100%;
-    }
-    .btn3::before{
-        height: 0;
-        width: 100%;
-        transform: translate(-50%, -50%) rotate(45deg);
-    }
-    .btn:hover::before{
-        height: 400%;
-    }
-    .btn4::before{
-        height: 0;
-        width: 100%;
-        transform: translate(-50%, -50%) rotate(-45deg);
-    }
-    .btn:hover::before{
-        height: 400%;
-    }
-    .title{
-        text-align: center;
-        font-size: 60px;
-        color: cyan;
-        text-shadow:0 0 10px cyan;
-    }
-</style>
 <body>
-    <P class="title">MENU</P>
-    <div class="middle">
-        <a href="" class="btn btn1">Hover Me</a>
-        <a href="" class="btn btn2">Hover Me</a>
-        <a href="" class="btn btn3">Hover Me</a>
-        <a href="" class="btn btn4">Hover Me</a>
-    </div>
+    <canvas id="voiceCanvas" width="600" height="200"></canvas>
+    <script>
+    	const canvas = document.getElementById('voiceCanvas');
+const ctx = canvas.getContext('2d');
+
+function drawWaveform(dataArray) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#7D5FFF';
+
+    ctx.beginPath();
+    const sliceWidth = canvas.width * 1.0 / dataArray.length;
+    let x = 0;
+
+    for (let i = 0; i < dataArray.length; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * canvas.height / 2;
+
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+    }
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+}
+
+function setupAudioProcessing() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+
+            analyser.fftSize = 2048;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteTimeDomainData(dataArray);
+                drawWaveform(dataArray);
+            }
+
+            draw();
+        })
+        .catch(err => {
+            console.error('Error accessing audio stream:', err);
+        });
+}
+
+setupAudioProcessing();
+
+    </script>
 </body>
 </html>
